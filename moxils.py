@@ -109,17 +109,17 @@ async def on_raw_reaction_add(payload):
     file.close()
     for i in range(1,len(settingsList)):
         keyFind=settingsList[i].split()
-        reactChannel=keyFind[3]
+        reactMessage=keyFind[3]
         reactEmote=keyFind[6]
         reactRole=" ".join(keyFind[9:])
-        if payload.message_id == int(reactChannel):
+        if payload.message_id == int(reactMessage):
             guild = bot.get_guild(payload.guild_id)
             member = guild.get_member(payload.user_id)
             if str(payload.emoji) == reactEmote:
                 role = discord.utils.get(guild.roles, name=reactRole)
                 await member.add_roles(role)
                 logDate="------------------------------------------------------------\n\n["+datetime.now().strftime("%d/%m/%Y %H:%M:%S")+"]: "
-                e=(f'{guild.get_member(payload.user_id).name} has reacted with {reactEmote} on [{reactChannel}] to get the "{reactRole}" role.\n[ID]: {payload.user_id}\n\n')
+                e=(f'{guild.get_member(payload.user_id).name} has reacted with {reactEmote} on [{reactMessage}] to get the "{reactRole}" role.\n[ID]: {payload.user_id}\n\n')
                 logging(payload.guild_id, e, logDate)
 
 @bot.event
@@ -130,17 +130,17 @@ async def on_raw_reaction_remove(payload):
     file.close()
     for i in range(1,len(settingsList)):
         keyFind=settingsList[i].split()
-        reactChannel=keyFind[3]
+        reactMessage=keyFind[3]
         reactEmote=keyFind[6]
         reactRole=" ".join(keyFind[9:])
-        if payload.message_id == int(reactChannel):
+        if payload.message_id == int(reactMessage):
             guild = bot.get_guild(payload.guild_id)
             member = guild.get_member(payload.user_id)
             if str(payload.emoji) == reactEmote:
                 role = discord.utils.get(guild.roles, name=reactRole)
                 await member.remove_roles(role)
                 logDate="------------------------------------------------------------\n\n["+datetime.now().strftime("%d/%m/%Y %H:%M:%S")+"]: "
-                e=(f'{guild.get_member(payload.user_id).name} has removed their {reactEmote} on [{reactChannel}] and lost the "{reactRole}" role.\n[ID]: {payload.user_id}\n\n')
+                e=(f'{guild.get_member(payload.user_id).name} has removed their {reactEmote} on [{reactMessage}] and lost the "{reactRole}" role.\n[ID]: {payload.user_id}\n\n')
                 logging(payload.guild_id, e, logDate)
 
 
@@ -208,9 +208,9 @@ async def setupAllowedRole(ctx, role: str):
     await ctx.response.send_message(f"\"{role}\" has been made the server's only role with access to the advanced commands!", ephemeral=True)
 
 
-@bot.tree.command(name='set_verif', description='[ADMIN] Gives a message a verification attribute.')
+@bot.tree.command(name='set_react', description='[ADMIN] Gives a message a verification attribute.')
 @app_commands.check(owner_admin)
-async def verif_msg(ctx, id: str, role: str, react: str):
+async def react_msg(ctx, id: str, role: str, react: str):
     path = dir+"/serverData/" + str(ctx.guild.id)
     file = open(path + "/" + "settings.txt", "r", encoding='utf-8')
     settingsList=file.readlines()
@@ -220,23 +220,36 @@ async def verif_msg(ctx, id: str, role: str, react: str):
     except ValueError:
         await ctx.response.send_message('Invalid message ID, please try again.', ephemeral=True)
         return
+    react=react.replace(" ","")
     for i in range(len(settingsList)):
         keyFind=settingsList[i].split()
         if len(keyFind)>=3:
-            if str(id)==keyFind[3]:
+            if str(id)==keyFind[3] and react==keyFind[6]:
                 fileReplace = open(path + "/" + "settings.txt", "w", encoding='utf-8')
-                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Channel_ID): {id} | (Emote): {react.replace(" ","")} | (Role): {role}\n'
+                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Channel_ID): {id} | (Emote): {react} | (Role): {role}\n'
                 fileReplace.writelines(settingsList)
                 fileReplace.close()
                 msg=await ctx.channel.fetch_message(id)
-                await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Replaced the previous reaction with "{role}" using {react.replace(" ","")}', ephemeral=True)
+                await msg.add_reaction(react)
+                await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Replaced the "{keyFind[9]}" role with the "{role}" role using the "{react}" reaction', ephemeral=True)
+                break
+            elif str(id)==keyFind[3]:
+                fileReplace = open(path + "/" + "settings.txt", "w", encoding='utf-8')
+                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Channel_ID): {id} | (Emote): {react} | (Role): {role}\n'
+                fileReplace.writelines(settingsList)
+                fileReplace.close()
+                msg=await ctx.channel.fetch_message(id)
+                await msg.add_reaction(react)
+                await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Added  the "{role}" role using the "{react}" reaction', ephemeral=True)
                 break
         if i==len(settingsList)-1:
             fileAdd = open(path + "/" + "settings.txt", "a", encoding='utf-8')
-            txt=f'[Ver. #{len(settingsList)}]= (Channel_ID): {id} | (Emote): {react.replace(" ","")} | (Role): {role}'
+            txt=f'[Ver. #{len(settingsList)}]= (Channel_ID): {id} | (Emote): {react} | (Role): {role}'
             fileAdd.write(txt+"\n")
             fileAdd.close()
-            await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Added "{role}" via the "{react.replace(" ","")}" reaction', ephemeral=True)
+            msg=await ctx.channel.fetch_message(id)
+            await msg.add_reaction(react)
+            await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Added the "{role}" role using the "{react}" reaction', ephemeral=True)
             
             
 
