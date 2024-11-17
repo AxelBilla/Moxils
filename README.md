@@ -14,7 +14,7 @@ A given role may be given by multiple reactions at the same time.
 </br></br>
 
 ## 【 Administrator Commands 】
-</br></br>
+
 
 ### /role_moxils [role_name]
 Transfer the access to the advanced commands from the previous role to a newly given one (i.e, "moderator")
