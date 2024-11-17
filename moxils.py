@@ -226,7 +226,7 @@ async def react_msg(ctx, id: str, role: str, react: str):
         if len(keyFind)>=3:
             if str(id)==keyFind[3] and react==keyFind[6]:
                 fileReplace = open(path + "/" + "settings.txt", "w", encoding='utf-8')
-                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Channel_ID): {id} | (Emote): {react} | (Role): {role}\n'
+                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}\n'
                 fileReplace.writelines(settingsList)
                 fileReplace.close()
                 msg=await ctx.channel.fetch_message(id)
@@ -235,7 +235,7 @@ async def react_msg(ctx, id: str, role: str, react: str):
                 break
             elif str(id)==keyFind[3]:
                 fileReplace = open(path + "/" + "settings.txt", "w", encoding='utf-8')
-                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Channel_ID): {id} | (Emote): {react} | (Role): {role}\n'
+                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}\n'
                 fileReplace.writelines(settingsList)
                 fileReplace.close()
                 msg=await ctx.channel.fetch_message(id)
@@ -244,7 +244,7 @@ async def react_msg(ctx, id: str, role: str, react: str):
                 break
         if i==len(settingsList)-1:
             fileAdd = open(path + "/" + "settings.txt", "a", encoding='utf-8')
-            txt=f'[Ver. #{len(settingsList)}]= (Channel_ID): {id} | (Emote): {react} | (Role): {role}'
+            txt=f'[Ver. #{len(settingsList)}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}'
             fileAdd.write(txt+"\n")
             fileAdd.close()
             msg=await ctx.channel.fetch_message(id)
