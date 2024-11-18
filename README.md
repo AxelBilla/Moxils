@@ -12,6 +12,10 @@ Adds a role-granting reaction to a given message.
 A given role may be given by multiple reactions at the same time. 
 **[Only accessible with an allowed role]**
 </br></br>
+### /purge [amount]
+Deletes the last X messages.
+**[Only accessible with an allowed role]**
+</br></br>
 
 ## 【 Administrator Commands 】
 
