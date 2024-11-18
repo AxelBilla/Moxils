@@ -2,13 +2,15 @@
 
 import os
 import discord
-import typing
+#pip install discord
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import has_permissions, MissingPermissions
 from random import randint
 from private.config import token
 from datetime import datetime
+from emoji import emoji_count
+#pip install emoji
 
 owner_id=1242535080866349226
 intents = discord.Intents.default()
@@ -35,6 +37,15 @@ def logging(guild, event: str, time):
     file = open(path + "/" + "logs.txt", "a", encoding='utf-8')
     file.write(f"{time}{event}\n")
     file.close()
+
+def emoteCheck(emote):
+    try:
+        emote_obj=int(emote.split(":", 2)[-1][:-1])
+    except ValueError:
+        emote_obj = None
+    emote_obj=discord.utils.get(bot.emojis, id=emote_obj)
+    if emoji_count(emote) == 1 or emote_obj != None:
+        return True
 
 @bot.event
 async def owner_admin(ctx): #Allows me to debug stuff at will.
@@ -221,35 +232,29 @@ async def react_msg(ctx, id: str, role: str, react: str):
         await ctx.response.send_message('Invalid message ID, please try again.', ephemeral=True)
         return
     react=react.replace(" ","")
-    for i in range(len(settingsList)):
-        keyFind=settingsList[i].split()
-        if len(keyFind)>=3:
-            if str(id)==keyFind[3] and react==keyFind[6]:
-                fileReplace = open(path + "/" + "settings.txt", "w", encoding='utf-8')
-                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}\n'
-                fileReplace.writelines(settingsList)
-                fileReplace.close()
+    if not emoteCheck(react):
+            await ctx.response.send_message('Invalid reaction, please try again.', ephemeral=True)
+    else:
+        for i in range(len(settingsList)):
+            keyFind=settingsList[i].split()
+            if len(keyFind)>=3:
+                if str(id)==keyFind[3] and react==keyFind[6]:
+                    fileReplace = open(path + "/" + "settings.txt", "w", encoding='utf-8')
+                    settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}\n'
+                    fileReplace.writelines(settingsList)
+                    fileReplace.close()
+                    msg=await ctx.channel.fetch_message(id)
+                    await msg.add_reaction(react)
+                    await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Replaced the "{keyFind[9]}" role with the "{role}" role using the "{react}" reaction', ephemeral=True)
+                    break
+            if i==len(settingsList)-1:
+                fileAdd = open(path + "/" + "settings.txt", "a", encoding='utf-8')
+                txt=f'[Ver. #{len(settingsList)}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}'
+                fileAdd.write(txt+"\n")
+                fileAdd.close()
                 msg=await ctx.channel.fetch_message(id)
                 await msg.add_reaction(react)
-                await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Replaced the "{keyFind[9]}" role with the "{role}" role using the "{react}" reaction', ephemeral=True)
-                break
-            elif str(id)==keyFind[3]:
-                fileReplace = open(path + "/" + "settings.txt", "w", encoding='utf-8')
-                settingsList[i]=f'[Ver. #{len(settingsList)-1}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}\n'
-                fileReplace.writelines(settingsList)
-                fileReplace.close()
-                msg=await ctx.channel.fetch_message(id)
-                await msg.add_reaction(react)
-                await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Added  the "{role}" role using the "{react}" reaction', ephemeral=True)
-                break
-        if i==len(settingsList)-1:
-            fileAdd = open(path + "/" + "settings.txt", "a", encoding='utf-8')
-            txt=f'[Ver. #{len(settingsList)}]= (Message_ID): {id} | (Emote): {react} | (Role): {role}'
-            fileAdd.write(txt+"\n")
-            fileAdd.close()
-            msg=await ctx.channel.fetch_message(id)
-            await msg.add_reaction(react)
-            await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Added the "{role}" role using the "{react}" reaction', ephemeral=True)
+                await ctx.response.send_message(f'[https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}] Added the "{role}" role using the "{react}" reaction', ephemeral=True)
             
             
 
