@@ -12,7 +12,7 @@ from datetime import datetime
 from emoji import emoji_count
 #pip install emoji
 
-owner_id=1242535080866349226
+owner_id=
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
