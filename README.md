@@ -1,4 +1,4 @@
-# **Moxils**
+# **mUtils**
 
 
 Discord Bot made to manage servers.
